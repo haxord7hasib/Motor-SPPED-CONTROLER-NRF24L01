@@ -1,0 +1,26 @@
+#include <SPI.h>
+#include <RF24.h>
+ 
+RF24 radio(7, 8); // CE, CSN
+const byte addresses[] = {"1Node"};
+struct dataStruct {
+  int angleValue_1;      
+  int angleValue_2;
+  } myData;
+ 
+void setup() {
+  radio.begin();
+  radio.setChannel(83);
+  radio.setDataRate(RF24_250KBPS);
+  radio.setPALevel(RF24_PA_LOW);
+  radio.openWritingPipe(addresses[0]);
+  radio.stopListening();
+}
+ 
+void loop() {
+  int potValue_1 = analogRead(A1);
+  int potValue_2 = analogRead(A2);
+  myData.angleValue_1 = map(potValue_1, 0, 1023, 90, 180);
+  myData.angleValue_2 = map(potValue_2, 0, 1023, 90, 180);
+  radio.write( &myData, sizeof(myData));
+}

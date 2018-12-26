@@ -1,0 +1,34 @@
+ #include <SPI.h>
+#include <RF24.h>
+#include <Servo.h>
+ 
+RF24 radio(7, 8); // CE, CSN
+const byte addresses[] = "1Node";
+const byte pipe = 1;
+Servo myServo_1;
+Servo myServo_2;
+struct dataStruct {
+  int angleValue_1;        
+  int angleValue_2;
+  } myData;
+ 
+void setup() {
+  myServo_1.attach(5);
+  myServo_2.attach(6);
+  radio.begin();
+  radio.setChannel(83);
+  radio.setDataRate(RF24_250KBPS);
+  radio.setPALevel(RF24_PA_LOW);
+  radio.openReadingPipe(pipe, addresses[0]);
+  radio.startListening();
+}
+ 
+void loop() {
+  if (radio.available()) {
+    while (radio.available()) {
+      radio.read( &myData, sizeof(myData) );
+      myServo_1.write(myData.angleValue_1);
+      myServo_2.write(myData.angleValue_2);
+      }
+    }
+}
